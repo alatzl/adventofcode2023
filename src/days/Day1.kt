@@ -12,54 +12,38 @@ class Day1 : Day(1) {
     }
 
     private fun getNumberFromString(str: String) : Int {
-        val digits = str.filter { it.isDigit() }.toList()
-        return "${digits[0]}${digits[digits.size - 1]}".toInt()
+        val firstDigit = str.first { it.isDigit() }
+        val lastDigit = str.last { it.isDigit() }
+        return "$firstDigit$lastDigit".toInt()
     }
 
     override fun part2() {
-        val numStrings = mapOf(
-            0 to "zero",
-            1 to "one",
-            2 to "two",
-            3 to "three",
-            4 to "four",
-            5 to "five",
-            6 to "six",
-            7 to "seven",
-            8 to "eight",
-            9 to "nine"
+        val words = hashMapOf(
+            "zero" to 0,
+            "one" to 1,
+            "two" to 2,
+            "three" to 3,
+            "four" to 4,
+            "five" to 5,
+            "six" to 6,
+            "seven" to 7,
+            "eight" to 8,
+            "nine" to 9
         )
 
+        val digits = List(10) { "$it"}
+
         val sum = inputList.map { line ->
-            val digits = line.filter { it.isDigit() }.toList()
+            val (firstWordIdx, firstWord) = line.findAnyOf(words.map { (k, _) -> k }) ?: (Int.MAX_VALUE to "not found")
+            val (lastWordIdx, lastWord) = line.findLastAnyOf(words.map { (k, _) -> k }) ?: (Int.MIN_VALUE to "not found")
+            val (firstDigitIdx, firstDigit) = line.findAnyOf(digits) ?: (Int.MAX_VALUE to "not found")
+            val (lastDigitIdx, lastDigit) = line.findLastAnyOf(digits) ?: (Int.MIN_VALUE to "not found")
 
-            var firstDigit : String? = null
-            var firstDigitIdx = 300 // something high
-            var lastDigit : String? = null
-            var lastDigitIdx = -1
+            var result = ""
+            result += if (firstDigitIdx < firstWordIdx) firstDigit else words[firstWord]
+            result += if (lastDigitIdx > lastWordIdx) lastDigit else words[lastWord]
 
-            if (digits.isNotEmpty()) {
-                firstDigit = "${digits[0]}"
-                firstDigitIdx = line.indexOf(firstDigit)
-                lastDigit = "${digits[digits.size - 1]}"
-                lastDigitIdx = line.lastIndexOf(lastDigit)
-            }
-
-            numStrings.forEach { (k, v) ->
-                val foundFirst = line.indexOf(v)
-                val foundLast = line.lastIndexOf(v)
-
-                if (foundFirst in 0..<firstDigitIdx) {
-                    firstDigitIdx = foundFirst
-                    firstDigit = "$k"
-                }
-                if (foundLast > lastDigitIdx && foundLast < line.length) {
-                    lastDigitIdx = foundLast
-                    lastDigit = "$k"
-                }
-            }
-            val result = "$firstDigit$lastDigit".toInt()
-            result
+            result.toInt()
         }.reduce { acc, str ->
             acc + str
         }
