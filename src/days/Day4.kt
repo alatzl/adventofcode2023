@@ -1,7 +1,14 @@
 package days
 
-class Day4: Day(4){
-    private fun parseInput(input: List<String>): List<Pair<List<String>, List<String>>> {
+class Day4: Day(4) {
+    class Card(
+        val cardNo: Int,
+        var wins: List<Int>,
+        var have: List<Int>,
+        var matches: MutableList<Int>? = mutableListOf<Int>()
+    )
+
+    private fun parseInput(input: List<String>): List<Card> {
         return input.map {
             val parts = it.split(": ")[1]
                 .split(" | ")
@@ -9,14 +16,18 @@ class Day4: Day(4){
                     p.split(" ")
                     .map { x -> x.trim() }
                     .filterNot { y -> y.isEmpty() }
+                        .map { z -> z.toInt() }
                 }
-            Pair(parts[0], parts[1])
+            val cardNum = it.split(": ")[0].split(" ").map { x -> x.trim() }.filterNot { y -> y.isEmpty() }[1]
+//            println(cardNum)
+            Card(cardNum.toInt(), parts[0], parts[1])
         }
     }
+
     override fun part1() {
         val parsed = parseInput(inputList)
         val result = parsed.map { card ->
-            card.first.intersect(card.second.toSet()).map { it.toInt() }
+            card.wins.intersect(card.have.toSet())
             .fold(0) { acc, _ ->
                 if (acc == 0) {
                     1
@@ -29,6 +40,28 @@ class Day4: Day(4){
     }
 
     override fun part2() {
-        TODO("Not yet implemented")
+        val parsed = parseInput(testInputList)
+        var result = parsed.map { card ->
+            card.matches = card.wins.intersect(card.have.toSet()).toMutableList()
+            card
+//        }.filter { c ->
+//            c.matches?.isNotEmpty() == true
+//        }.map { idx, wins ->
+//            for ()
+        }.toMutableList()
+
+        var additionalCards: MutableList<Card> = mutableListOf()
+        for (i in 0..result.size) {
+            val size = result[i].matches?.size ?: 0
+            if (size > 0) {
+                for (j in 1..size) {
+                    result.add(result[i + j])
+                }
+            }
+        }
+
+//        println(additionalCards)
+        println(result)
+
     }
 }
